@@ -1,13 +1,13 @@
 import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
-import { ethers, BigNumber } from "ethers";
-import { useEffect, useRef, useState } from "react";
+import { ethers } from "ethers";
+import { useRef, useState } from "react";
 import useBridgeContract from "../hooks/useBridgeContract";
 import Loader from "./Loader";
 import { TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY, TOKEN_ADDRESS_ROPSTEN } from "../constants";
-import ERC20_ABI from "../contracts/Token.json";
 import { signERC2612Permit } from "eth-permit";
 import { formatEtherscanLink } from "../util";
+
 type IBridgeContract = {
   contractAddress: string;
 };
@@ -19,56 +19,33 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
   const [txHash, setTxHash] = useState<string | undefined>("");
   const [errorMessage, setErrorMessage] = useState<string | undefined>('');
   const amountRef = useRef<HTMLInputElement | undefined>(null);
+  const syncLockValueRef = useRef<number>(0);
 
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
+
   const displayErrorReason = (err: any) => {
     if (err.error) {
       setErrorMessage(err.error.message.slice(20));
       setTimeout(() => {
         setErrorMessage('')
       }, 3000)
+    } else if (err.message) {
+      setErrorMessage(err.message);
+      setTimeout(() => {
+        setErrorMessage('')
+      }, 3000)
     }
   }
-
-  const unlockTokensOnTargetChain = async function (tokenTargetAddress: string, bridgeTargetAddress: string) {
-    const unlockValue = ethers.utils.parseEther(amountRef?.current?.value);
-    if (typeof window.ethereum !== 'undefined') {
-      try {
-        const permit = await signERC2612Permit(
-          window.ethereum,
-          tokenTargetAddress,
-          account,
-          bridgeTargetAddress,
-          unlockValue.toString()
-        )
-        const lockTx = await bridgeContract.lock(
-          unlockValue,
-          permit.deadline,
-          permit.v,
-          permit.r,
-          permit.s
-        )
-        setIsLoading(true);
-        setTxHash(lockTx.hash);
-        await lockTx.wait();
-
-        const unlockTx = await bridgeContract.unlock(unlockValue.mul(2).toString());
-        setIsLoading(true);
-        setTxHash(unlockTx.hash);
-        await unlockTx.wait();
-        amountRef.current.value = '';
-        setIsLoading(false);
-      } catch (err) {
-        displayErrorReason(err)
-      }
-    }
-  }
-
 
   const sendTokensToTargetChain = async function (tokenOriginAddress: string, bridgeOriginAddress: string) {
+    let inputValue = parseInt(amountRef?.current?.value);
     const lockValue = ethers.utils.parseEther(amountRef?.current?.value);
-    if (typeof window.ethereum !== 'undefined') {
 
+    console.log('inputValue :>> ', inputValue);
+    console.log('lockValue :>> ', lockValue);
+    console.log('syncLockValue :>> ', syncLockValueRef.current);
+
+    if (typeof window.ethereum !== 'undefined') {
       try {
         const permit = await signERC2612Permit(
           window.ethereum,
@@ -87,19 +64,60 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         setIsLoading(true);
         setTxHash(lockTx.hash);
         await lockTx.wait();
-
-        const unlockTxRopsten = await bridgeContract.burn(lockValue.mul(3).toString());
-        setIsLoading(true);
-        setTxHash(unlockTxRopsten.hash);
-        await unlockTxRopsten.wait();
-        amountRef.current.value = ''
+        amountRef.current.value = '';
+        syncLockValueRef.current += inputValue;
         setIsLoading(false);
       } catch (err) {
         displayErrorReason(err)
       }
     }
+    console.log('inputValue :>> ', inputValue);
+    console.log('lockValue :>> ', lockValue);
+    console.log('syncLockValue :>> ', syncLockValueRef.current);
   }
 
+
+  const unlockTokensOnTargetChain = async function () {
+    let inputValue = parseInt(amountRef?.current?.value);
+    const unlockValue = ethers.utils.parseEther(amountRef?.current?.value);
+    console.log('inputValue :>> ', inputValue);
+    console.log('unlockValue :>> ', unlockValue);
+    console.log('syncLockValue :>> ', syncLockValueRef.current);
+
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+        console.log('syncLockValue :>> ', syncLockValueRef.current);
+        const syncTx = await bridgeContract.increaseBalanceOfOwnerWithValue(
+          syncLockValueRef.current
+        );
+
+        setIsLoading(true);
+        setTxHash(syncTx.hash);
+        await syncTx.wait();
+
+      } catch (err) {
+        displayErrorReason(err)
+      }
+    }
+    if (typeof window.ethereum !== 'undefined') {
+      try {
+
+        const unlockTx = await bridgeContract.unlock(unlockValue);
+        setIsLoading(true);
+        setTxHash(unlockTx.hash);
+        await unlockTx.wait();
+        syncLockValueRef.current -= inputValue;
+        amountRef.current.value = '';
+        setIsLoading(false);
+      } catch (err) {
+        displayErrorReason(err)
+      }
+    }
+    console.log('inputValue :>> ', inputValue);
+    console.log('unlockValue :>> ', unlockValue);
+    console.log('syncLockValue :>> ', syncLockValueRef.current);
+
+  }
 
   return (
     <div className="form">
@@ -112,7 +130,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
             </div>
             <div className="flex">
               <button onClick={() => sendTokensToTargetChain(TOKEN_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_ROPSTEN)}>Bridge to rinkeby</button>
-              <button onClick={() => unlockTokensOnTargetChain(TOKEN_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_ROPSTEN)}>Unlock tokens on ropsten</button>
+              <button onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on ropsten</button>
             </div>
 
           </section>
@@ -124,7 +142,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
             </div>
             <div className="flex">
               <button onClick={() => sendTokensToTargetChain(TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_RINKEBY)}>Bridge to ropsten</button>
-              <button onClick={() => unlockTokensOnTargetChain(TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_RINKEBY)}>Unlock tokens on rinkeby</button>
+              <button onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on rinkeby</button>
             </div>
           </section>
         }
