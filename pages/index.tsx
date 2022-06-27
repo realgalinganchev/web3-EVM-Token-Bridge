@@ -8,6 +8,12 @@ import Bridge from "../components/Bridge";
 import { TOKEN_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_ROPSTEN, TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_RINKEBY } from "../constants";
 import useEagerConnect from "../hooks/useEagerConnect";
 import { formatEtherscanLink } from "../util";
+import { useEffect, useState } from "react";
+
+type IBalanceOf = {
+  address: string,
+  balance: number
+};
 
 function Home() {
   const { account, library, chainId } = useWeb3React();
@@ -17,7 +23,16 @@ function Home() {
   const isConnected = typeof account === "string" && !!library;
   const currentNetworkEtherscanLink = formatEtherscanLink("Account", [chainId, account]);
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
+  const [syncBalancesOf, setSyncBalancesOf] = useState<[IBalanceOf] | undefined>([] as any);
 
+
+  useEffect(() => {
+    console.log(syncBalancesOf);
+  })
+
+  const updateSyncBalancesOf = async function (balances: [IBalanceOf]) {
+    setSyncBalancesOf(balances);
+  }
   return (
     <div>
       <Head>
@@ -54,7 +69,7 @@ function Home() {
             <p> Current network : {currentNetwork}</p>
             <NativeCurrencyBalance />
             <TokenBalance tokenAddress={TOKEN_ADDRESS_ROPSTEN} symbol="TKN" />
-            <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} />
+            <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} syncBalancesOf={syncBalancesOf} updateSyncBalancesOf={updateSyncBalancesOf} />
           </section>)
         }
         {isConnected && currentNetwork === "rinkeby" && (
@@ -62,7 +77,7 @@ function Home() {
             <p> Current network : {currentNetwork}</p>
             <NativeCurrencyBalance />
             <TokenBalance tokenAddress={TOKEN_ADDRESS_RINKEBY} symbol="TKN" />
-            <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} />
+            <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} syncBalancesOf={syncBalancesOf} updateSyncBalancesOf={updateSyncBalancesOf} />
           </section>
         )
         }
