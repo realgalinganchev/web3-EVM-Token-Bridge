@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "hooks/validator.js", "utils/validator.js", "utils/validator.js", "utils/getContractAt.js"],
   "exclude": ["node_modules"]
 }

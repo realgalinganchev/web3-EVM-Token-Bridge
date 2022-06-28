@@ -76,44 +76,8 @@
   {
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "name": "burn",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "address",
-        "name": "owner",
-        "type": "address"
-      },
-      {
-        "internalType": "uint256",
-        "name": "value",
-        "type": "uint256"
-      },
-      {
-        "internalType": "bool",
-        "name": "hasToBeIncreased",
-        "type": "bool"
-      }
-    ],
-    "name": "changeBalanceOfOwnerWithValue",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "address",
-        "name": "owner",
+        "name": "_owner",
         "type": "address"
       }
     ],
@@ -137,39 +101,26 @@
       },
       {
         "internalType": "uint256",
-        "name": "deadline",
+        "name": "_deadline",
         "type": "uint256"
       },
       {
         "internalType": "uint8",
-        "name": "v",
+        "name": "_v",
         "type": "uint8"
       },
       {
         "internalType": "bytes32",
-        "name": "r",
+        "name": "_r",
         "type": "bytes32"
       },
       {
         "internalType": "bytes32",
-        "name": "s",
+        "name": "_s",
         "type": "bytes32"
       }
     ],
     "name": "lock",
-    "outputs": [],
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "_value",
-        "type": "uint256"
-      }
-    ],
-    "name": "mint",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
@@ -190,6 +141,24 @@
   {
     "inputs": [],
     "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_owner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_value",
+        "type": "uint256"
+      }
+    ],
+    "name": "setBalanceOfOwnerWithValue",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
