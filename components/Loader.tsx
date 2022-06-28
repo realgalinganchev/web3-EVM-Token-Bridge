@@ -1,3 +1,4 @@
+import { formatUnits } from "@ethersproject/units";
 
 export default function Loader({ ...props }) {
 
@@ -8,6 +9,7 @@ export default function Loader({ ...props }) {
                     <p>Tx in progress..</p>
                 </div>
                 <p>The transaction hash is {props.txHash}</p>
+                <p>The amount being transferred is {formatUnits(props.txAmount)}</p>
                 <a
                     rel="noopener noreferrer nofollow"
                     target="_blank"

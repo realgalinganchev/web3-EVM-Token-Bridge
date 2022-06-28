@@ -65,22 +65,22 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         ) : (
           <button onClick={startOnboarding}>Install Metamask</button>
         )}
-        {(<button
-          disabled={connecting}
-          onClick={async () => {
-            try {
-              await activate(walletConnect(), undefined, true)
-            } catch (e) {
-              if (error instanceof UserRejectedRequestError) {
-                setConnecting(false);
-              } else {
-                setError(error);
-              }
-            }
-          }}>
-          Wallet Connect
-        </button>)
-        }
+            {/* {(<button
+              disabled={connecting}
+              onClick={async () => {
+                try {
+                  await activate(walletConnect(), undefined, true)
+                } catch (e) {
+                  if (error instanceof UserRejectedRequestError) {
+                    setConnecting(false);
+                  } else {
+                    setError(error);
+                  }
+                }
+              }}>
+              Wallet Connect
+            </button>)
+            } */}
       </div>
     );
   }
@@ -94,7 +94,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
           rel: "noopener noreferrer",
         }}
       >
-        {ENSName || `${shortenHex(account, 4)}`}
+        {ENSName || account}
         
       </a>
       

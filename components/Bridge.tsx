@@ -1,12 +1,13 @@
 import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
+import { signERC2612Permit } from "eth-permit";
+import { formatEtherscanLink } from "../util";
+import { parseEther } from "ethers/lib/utils";
+import { BigNumber } from "ethers";
 import useBridgeContract from "../hooks/useBridgeContract";
 import Loader from "./Loader";
 import { TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY, TOKEN_ADDRESS_ROPSTEN } from "../constants";
-import { signERC2612Permit } from "eth-permit";
-import { formatEtherscanLink } from "../util";
-import { formatUnits, parseEther } from "ethers/lib/utils";
 
 type IBridgeContract = {
   contractAddress: string;
@@ -17,6 +18,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
   const bridgeContract = useBridgeContract(contractAddress);
   const [isLoading, setIsLoading] = useState<boolean | undefined>(false);
   const [txHash, setTxHash] = useState<string | undefined>("");
+  const [txAmount, setTxAmount] = useState<BigNumber | undefined>(BigNumber.from(0));
   const [errorMessage, setErrorMessage] = useState<string | undefined>('');
   const amountRef = useRef<HTMLInputElement | undefined>(null);
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
@@ -58,6 +60,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         );
         setIsLoading(true);
         setTxHash(lockTx.hash);
+        setTxAmount(lockValue);
         await lockTx.wait();
         amountRef.current.value = '';
         setIsLoading(false);
@@ -77,6 +80,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         const unlockTx = await bridgeContract.unlock(unlockValue);
         setIsLoading(true);
         setTxHash(unlockTx.hash);
+        setTxAmount(unlockValue);
         await unlockTx.wait();
         amountRef.current.value = '';
         setIsLoading(false);
@@ -116,7 +120,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         }
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {isLoading && <Loader txHash={txHash} currentNetwork={currentNetwork} />}
+      {isLoading && <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />}
       <style jsx>{`
         .form {
           display: flex;
