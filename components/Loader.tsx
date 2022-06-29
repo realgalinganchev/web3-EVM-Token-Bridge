@@ -5,18 +5,28 @@ export default function Loader({ ...props }) {
     return (
         <>
             <div>
-                <div className="loader">
-                    <p>Tx in progress..</p>
-                </div>
-                <p>The transaction hash is {props.txHash}</p>
-                <p>The amount being transferred is {formatUnits(props.txAmount)}</p>
-                <a
-                    rel="noopener noreferrer nofollow"
-                    target="_blank"
-                    href={`https://${props.currentNetwork}.etherscan.io/tx/` + props.txHash}>
-                    Check out the status live on etherscan!
-                </a>
+                {props.forTx ?
+                    <div className="loader">
+                        <p>Loading Txs</p>
+                    </div>
+                    :
+                    <>
+                        <div className="loader">
+                            <p>Tx in progress..</p>
+                        </div>
+                        <p>The transaction hash is {props.txHash}</p>
+                        <p>The amount being transferred is {formatUnits(props.txAmount)}</p>
+                        <a
+                            rel="noopener noreferrer nofollow"
+                            target="_blank"
+                            href={`https://${props.currentNetwork}.etherscan.io/tx/` + props.txHash}>
+                            Check out the status live on etherscan!
+                        </a>
+
+                    </>
+                }
             </div>
+
             <style jsx>{`
             a {
                 background-color: #FF7A59;

@@ -1,9 +1,11 @@
-import React, { useEffect, useState, useContext, cloneElement } from 'react'
+import React, { useEffect, useState } from 'react'
 import axios from "axios";
+import { formatUnits } from '@ethersproject/units';
 
-
-
-export const TransactionHistory = () => {
+export const TransactionHistory = ({ ...props }) => {
+    const loadingTxsHasFinished = (hasFinished: boolean) => {
+        props.loadingTxsHasFinished(hasFinished);
+    }
 
     interface Transaction {
         sender: string,
@@ -15,59 +17,75 @@ export const TransactionHistory = () => {
     };
 
     const [transactionHistory, setTransactionHistory] = useState<Transaction[]>([]);
-    const [binIds, setBinIds] = useState<string[]>([]);
+    const [binIdUrls, setBinIdUrls] = useState<string[]>([]);
+    const token = "$2b$10$sdKpbNf7n/UgK4PIONrK6.Kwgp6DOZ6WZB103YCgfzEboDOleD/Yu";
+    const axiosHeaders = {
+        headers: {
+            'X-Master-Key': token
+        }
+    };
+    // useEffect(() => {
+    //     if (props.txHash.length > 0) {
+    //         const getUrl = "https://api.jsonbin.io/v3/c/uncategorized/bins";
+    //         axios
+    //             .get(getUrl, axiosHeaders)
+    //             .then(response =>
+    //                 setBinIdUrls(response.data.map((r: { record: any; }) => `https://api.jsonbin.io/v3/b/${r.record}/latest`)));
+    //     }
+    //     if (binIdUrls.length > 0) {
+    //         binIdUrls.forEach(async (currBinId, id) => {
+    //             await axios
+    //                 .get(currBinId, axiosHeaders)
+    //                 .then(response =>
+    //                     setTransactionHistory(transactionHistory => [...transactionHistory, response.data.record]))
+    //                 .catch(err => err);
+    //         })
+    //     }
+    //     console.log(transactionHistory.sort(function (b, a) {
+    //         return a.timestamp.localeCompare(b.timestamp)[0];
+    //     }))
+    // }, [])
 
     useEffect(() => {
-        const getUrl = "https://api.jsonbin.io/v3/c/uncategorized/bins"; // request URL
-        const token = "$2b$10$sdKpbNf7n/UgK4PIONrK6.Kwgp6DOZ6WZB103YCgfzEboDOleD/Yu"; // access token
-        var axiosHeaders = {
-            headers: {
-                'X-Master-Key': token,
-            }
-        };
+        const getUrl = "https://api.jsonbin.io/v3/c/uncategorized/bins";
         axios
             .get(getUrl, axiosHeaders)
             .then(response =>
-                setBinIds(response.data.map(r => r.record)));
+                setBinIdUrls(response.data.map((r: { record: any; }) => `https://api.jsonbin.io/v3/b/${r.record}/latest`)));
     }, [])
-
 
     useEffect(() => {
-        if (binIds.length > 0) {
-            binIds.forEach(currBinId => {
-                const getUrl = `https://api.jsonbin.io/v3/b/${currBinId}/latest`; // request URL
-                const token = "$2b$10$sdKpbNf7n/UgK4PIONrK6.Kwgp6DOZ6WZB103YCgfzEboDOleD/Yu"; // access token
-                var axiosHeaders = {
-                    headers: { 'X-Master-Key': token }
-                };
-                axios
-                    .get(getUrl, axiosHeaders)
-                    .then(response =>
-                        setTransactionHistory(transactionHistory => [...transactionHistory, response.data.record]));
-            });
-
+        if (transactionHistory.length > 0 && transactionHistory.length === binIdUrls.length) {
+            loadingTxsHasFinished(true);
         }
-    }, [])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [transactionHistory.length, binIdUrls.length]);
 
+    useEffect(() => {
+        if (binIdUrls.length > 0) {
+            binIdUrls.forEach(async (currBinId, id) => {
+                await axios
+                    .get(currBinId, axiosHeaders)
+                    .then(response =>
+                        setTransactionHistory(transactionHistory => [...transactionHistory, response.data.record]))
+                    .catch(err => err);
+            })
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [binIdUrls.length]);
 
     return (
         <div >
-            <div >{transactionHistory && transactionHistory?.map((transaction, index) => {
+            <div >{transactionHistory && transactionHistory.sort(function (b, a) {
+                return a.timestamp.localeCompare(b.timestamp);
+            })?.map((transaction, index) => {
                 return (
                     <div key={index}>
                         <div>
-                            <span>
-                                {transaction.sender}
-                            </span>
-                            has triggered {transaction.eventName}
-                            for {transaction.value} TKN{' '}
-                            to{' '}
-                            <span>
-                                {transaction.receiver}
-                            </span>
-                        </div>{' '}
-                        on{' '}<div>
-                            {transaction.timestamp}
+                            ...{transaction.sender.substring(transaction.receiver.length - 4)} has
+                            triggered {transaction.eventName} for {formatUnits(transaction.value)} TKN
+                            to ...{transaction.receiver.substring(transaction.receiver.length - 4)} {' '}
+                            on {transaction.timestamp}
                         </div>
                         <div>
                             <a

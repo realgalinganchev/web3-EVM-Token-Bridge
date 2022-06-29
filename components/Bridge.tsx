@@ -11,9 +11,10 @@ import { TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY, 
 
 type IBridgeContract = {
   contractAddress: string;
+  passTxHash: (txHash: string) => void;
 };
 
-const Bridge = ({ contractAddress }: IBridgeContract) => {
+const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
   const { account, library, chainId } = useWeb3React<Web3Provider>();
   const bridgeContract = useBridgeContract(contractAddress);
   const [isLoading, setIsLoading] = useState<boolean | undefined>(false);
@@ -22,6 +23,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>('');
   const amountRef = useRef<HTMLInputElement | undefined>(null);
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
+
 
   const displayErrorReason = (err: any) => {
     if (err.error) {
@@ -60,6 +62,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         );
         setIsLoading(true);
         setTxHash(lockTx.hash);
+        passTxHash(lockTx.hash)
         setTxAmount(lockValue);
         await lockTx.wait();
         amountRef.current.value = '';
@@ -76,10 +79,10 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
 
     if (typeof window.ethereum !== 'undefined') {
       try {
-
         const unlockTx = await bridgeContract.unlock(unlockValue);
         setIsLoading(true);
         setTxHash(unlockTx.hash);
+        passTxHash(unlockTx.hash)
         setTxAmount(unlockValue);
         await unlockTx.wait();
         amountRef.current.value = '';
@@ -120,7 +123,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         }
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {isLoading && <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />}
+      {isLoading && <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} forTx={false} />}
       <style jsx>{`
         .form {
           display: flex;
