@@ -30,6 +30,12 @@
         "internalType": "uint256",
         "name": "value",
         "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
+        "type": "uint256"
       }
     ],
     "name": "Lock",
@@ -60,6 +66,12 @@
       {
         "indexed": true,
         "internalType": "address",
+        "name": "sender",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
         "name": "receiver",
         "type": "address"
       },
@@ -67,6 +79,12 @@
         "indexed": false,
         "internalType": "uint256",
         "name": "value",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "timestamp",
         "type": "uint256"
       }
     ],

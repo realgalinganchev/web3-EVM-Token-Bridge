@@ -9,6 +9,7 @@ import { TOKEN_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_ROPSTEN, TOKEN_ADDRESS_RINKEBY, B
 import useEagerConnect from "../hooks/useEagerConnect";
 import { formatEtherscanLink } from "../util";
 import { useState } from "react";
+import { TransactionHistory } from "../components/TransactionHistory";
 
 
 type IBalanceOf = {
@@ -74,6 +75,7 @@ function Home() {
           </section>
         )
         }
+        <TransactionHistory/>
       </main>
 
       <style jsx>{`
