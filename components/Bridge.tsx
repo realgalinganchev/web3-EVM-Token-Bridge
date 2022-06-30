@@ -1,13 +1,15 @@
 import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { signERC2612Permit } from "eth-permit";
 import { formatEtherscanLink } from "../util";
 import { parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
+import axios from "axios";
 import useBridgeContract from "../hooks/useBridgeContract";
 import Loader from "./Loader";
 import { TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY, TOKEN_ADDRESS_ROPSTEN } from "../constants";
+
 
 type IBridgeContract = {
   contractAddress: string;
@@ -24,6 +26,78 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
   const amountRef = useRef<HTMLInputElement | undefined>(null);
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
 
+  const token = "$2b$10$sdKpbNf7n/UgK4PIONrK6.Kwgp6DOZ6WZB103YCgfzEboDOleD/Yu";
+  const axiosHeaders = {
+    headers: {
+      'X-Master-Key': token
+    }
+  };
+
+
+
+  const fetchLatestBinUrl = (txHash: string) => {
+
+    try {
+      const fetchData = async () => {
+        const getUrlAll = "https://api.jsonbin.io/v3/c/uncategorized/bins";
+        // const getUrlSingle = `https://api.jsonbin.io/v3/b/${r.record}/latest`;
+        // const updateUrlSingle = `https://api.jsonbin.io/v3/b/${r.record}`;
+        let latestBinUrl: string = "";
+        // Make first two requests
+        // const [firstResponse, secondResponse] = await Promise.all([
+        await axios
+          .get(getUrlAll, axiosHeaders)
+          .then(response =>
+            response.data.map((r: { record: any; }) =>
+              console.log('latestBinUrl :>> ', `https://api.jsonbin.io/v3/b/${r.record}`)));
+        //axios.get(getUrlSingle, axiosHeaders)
+        //axios.put(updateUrlSingle, data, axiosHeaders);
+        // ]);
+
+        // console.log("firstResponse.data:", firstResponse.data)
+        // console.log("secondResponse.data:", secondResponse.data)
+        // const thirdResponse = await axios.get('https://maps.googleapis.com/maps/api/directions/json?origin=place_id:' + firstResponse.data.results.place_id + '&destination=place_id:' + secondResponse.data.results.place_id + '&key=' + 'API-KEY-HIDDEN');
+
+      }
+      fetchData();
+    }
+    catch (err) {
+      console.log(err)
+    }
+
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+
+
+  //     // Make third request using responses from the first two
+
+  //     // Update state once with all 3 responses
+  //     this.setState({
+  //       p1Location: firstResponse.data,
+  //       p2Location: secondResponse.data,
+  //       route: thirdResponse.data,
+  //     });
+
+  //     axios
+  //       .get(getUrl, axiosHeaders)
+  //       .then(response =>
+  //         setBinIdUrls(response.data.map((r: { record: any; }) => `https://api.jsonbin.io/v3/b/${r.record}/latest`)));
+  //   }
+  //   if (binIdUrls.length > 0) {
+  //     binIdUrls.forEach(async (currBinId, id) => {
+  //       await axios
+  //         .get(currBinId, axiosHeaders)
+  //         .then(response =>
+  //           setTransactionHistory(transactionHistory => [...transactionHistory, response.data.record]))
+  //         .catch(err => err);
+  //     })
+  //   }
+  //   console.log(transactionHistory.sort(function (b, a) {
+  //     return a.timestamp.localeCompare(b.timestamp)[0];
+  //   }))
+  // }, [])
+
+
 
   const displayErrorReason = (err: any) => {
     if (err.error) {
@@ -39,8 +113,6 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
     }
     setIsLoading(false);
   }
-
-
 
   const sendTokensToTargetChain = async function (tokenOriginAddress: string, bridgeOriginAddress: string) {
     const lockValue = parseEther(amountRef?.current?.value);
@@ -62,6 +134,7 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
         );
         setIsLoading(true);
         setTxHash(lockTx.hash);
+        fetchLatestBinUrl(lockTx.hash)
         passTxHash(lockTx.hash)
         setTxAmount(lockValue);
         await lockTx.wait();
@@ -72,7 +145,6 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
       }
     }
   }
-
 
   const unlockTokensOnTargetChain = async function () {
     const unlockValue = parseEther(amountRef?.current?.value);

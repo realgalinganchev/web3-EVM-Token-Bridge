@@ -43,6 +43,17 @@ async function main() {
         const body = `{"sender":"${sender}","receiver":"${receiver}","value":"${value.toString()}","timestamp":"${getFullTimestamp(timestamp)}","eventName":"${eventName}","txHash":""}`;
         req.send(body);
     }
+    // const saveTx = async (sender, receiver, value, timestamp, eventName) => {
+    //     const postUrl = "https://api.jsonbin.io/v3/b";
+    //     const body = `{"sender":"${sender}","receiver":"${receiver}","value":"${value.toString()}","timestamp":"${getFullTimestamp(timestamp)}","eventName":"${eventName}","txHash":""}`;
+    //     await axios
+    //         .post(postUrl, body, {
+    //             headers: {
+    //                 'X-Master-Key': "$2b$10$sdKpbNf7n/UgK4PIONrK6.Kwgp6DOZ6WZB103YCgfzEboDOleD/Yu"
+    //             }
+    //         }).catch(er)
+    //         .then(({ data }) => console.log(data));
+    // }
 
     // const sendValue =  ethers.utils.parseEther("50000");
     // const sendTxRopsten = await tokenRopsten.transfer(addressBridgeRopsten, sendValue);
@@ -52,56 +63,81 @@ async function main() {
 
     console.log('Bridge Ropsten supply before lock :>> ', formatUnits(await tokenRopsten.balanceOf(addressBridgeRopsten)));
     console.log('Bridge Rinkeby supply before lock :>> ', formatUnits(await tokenRinkeby.balanceOf(addressBridgeRinkeby)));
-    console.log('Wallet Ropsten supply before lock :>> ', formatUnits(await tokenRopsten.balanceOf(addressWalletRopsten)));
-    console.log('Wallet Rinkeby supply before lock :>> ', formatUnits(await tokenRinkeby.balanceOf(addressWalletRinkeby)));
+    console.log('addressWalletRopsten :>> ', addressWalletRopsten);
+    console.log('addressWalletRinkeby :>> ', addressWalletRinkeby);
+
 
     bridgeRopsten.on("Lock", async (sender, receiver, value, timestamp) => {
         saveTx(sender, receiver, value, timestamp, "Lock");
-        const checkRinkebyBalanceOfBeforeSync = await bridgeRinkeby.getBalanceOfOwner(addressWalletRinkeby);
+        console.log('sender :>> ', sender);
+        console.log('receiver :>> ', receiver);
+        const checkRinkebyBalanceOfBeforeSync = await bridgeRinkeby.getBalanceOfOwner(sender);
         const sum = checkRinkebyBalanceOfBeforeSync.add(value);
         const syncTxRinkeby = await bridgeRinkeby.setBalanceOfOwnerWithValue(
-            addressWalletRinkeby,
+            sender,
             sum
         );
         await syncTxRinkeby.wait();
         console.log("Listening for Lock and Unlock events...")
+        console.log('Bridge Ropsten supply after lock :>> ', formatUnits(await tokenRopsten.balanceOf(addressBridgeRopsten)));
+        console.log('Bridge Rinkeby supply after lock :>> ', formatUnits(await tokenRinkeby.balanceOf(addressBridgeRinkeby)));
+        console.log('Wallet Ropsten supply after lock :>> ', formatUnits(await tokenRopsten.balanceOf(sender)));
+        console.log('Wallet Rinkeby supply after lock :>> ', formatUnits(await tokenRinkeby.balanceOf(sender)));
     })
 
 
     bridgeRinkeby.on("Unlock", async (sender, receiver, value, timestamp) => {
         saveTx(sender, receiver, value, timestamp, "Unlock");
-        const checkRopstenBalanceOfBeforeSync = await bridgeRopsten.getBalanceOfOwner(addressWalletRopsten);
+        console.log('sender :>> ', sender);
+        console.log('receiver :>> ', receiver);
+        const checkRopstenBalanceOfBeforeSync = await bridgeRopsten.getBalanceOfOwner(receiver);
         const diff = checkRopstenBalanceOfBeforeSync.sub(value);
         const syncTxRopsten = await bridgeRopsten.setBalanceOfOwnerWithValue(
-            addressWalletRopsten,
+            receiver,
             diff
         );
         await syncTxRopsten.wait();
         console.log("Listening for Lock and Unlock events...")
+        console.log('Bridge Ropsten supply after unlock :>> ', formatUnits(await tokenRopsten.balanceOf(addressBridgeRopsten)));
+        console.log('Bridge Rinkeby supply after unlock :>> ', formatUnits(await tokenRinkeby.balanceOf(addressBridgeRinkeby)));
+        console.log('Wallet Ropsten supply after lock :>> ', formatUnits(await tokenRopsten.balanceOf(receiver)));
+        console.log('Wallet Rinkeby supply after lock :>> ', formatUnits(await tokenRinkeby.balanceOf(receiver)));
     })
 
     bridgeRinkeby.on("Lock", async (sender, receiver, value, timestamp) => {
         saveTx(sender, receiver, value, timestamp, "Lock");
-        const checkRopstenBalanceOfBeforeSync = await bridgeRopsten.getBalanceOfOwner(addressWalletRopsten);
+        console.log('sender :>> ', sender);
+        console.log('receiver :>> ', receiver);
+        const checkRopstenBalanceOfBeforeSync = await bridgeRopsten.getBalanceOfOwner(sender);
         const sum = checkRopstenBalanceOfBeforeSync.add(value);
         const syncTxRopsten = await bridgeRopsten.setBalanceOfOwnerWithValue(
-            addressWalletRopsten,
+            sender,
             sum
         );
         await syncTxRopsten.wait();
         console.log("Listening for Lock and Unlock events...")
+        console.log('Bridge Ropsten supply after lock :>> ', formatUnits(await tokenRopsten.balanceOf(addressBridgeRopsten)));
+        console.log('Bridge Rinkeby supply after lock :>> ', formatUnits(await tokenRinkeby.balanceOf(addressBridgeRinkeby)));
+        console.log('Wallet Ropsten supply after lock :>> ', formatUnits(await tokenRopsten.balanceOf(sender)));
+        console.log('Wallet Rinkeby supply after lock :>> ', formatUnits(await tokenRinkeby.balanceOf(sender)));
     })
 
     bridgeRopsten.on("Unlock", async (sender, receiver, value, timestamp) => {
         saveTx(sender, receiver, value, timestamp, "Unlock");
-        const checkRinkebyBalanceOfBeforeSync = await bridgeRinkeby.getBalanceOfOwner(addressWalletRinkeby);
+        console.log('sender :>> ', sender);
+        console.log('receiver :>> ', receiver);
+        const checkRinkebyBalanceOfBeforeSync = await bridgeRinkeby.getBalanceOfOwner(receiver);
         const diff = checkRinkebyBalanceOfBeforeSync.sub(value);
         const syncTxRinkeby = await bridgeRinkeby.setBalanceOfOwnerWithValue(
-            addressWalletRinkeby,
+            receiver,
             diff
         );
         await syncTxRinkeby.wait();
         console.log("Listening for Lock and Unlock events...")
+        console.log('Bridge Ropsten supply after unlock :>> ', formatUnits(await tokenRopsten.balanceOf(addressBridgeRopsten)));
+        console.log('Bridge Rinkeby supply after unlock :>> ', formatUnits(await tokenRinkeby.balanceOf(addressBridgeRinkeby)));
+        console.log('Wallet Ropsten supply after lock :>> ', formatUnits(await tokenRopsten.balanceOf(receiver)));
+        console.log('Wallet Rinkeby supply after lock :>> ', formatUnits(await tokenRinkeby.balanceOf(receiver)));
     })
     console.log("Listening for Lock and Unlock events...")
 

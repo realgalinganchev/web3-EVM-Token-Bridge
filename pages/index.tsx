@@ -29,7 +29,7 @@ function Home() {
   const passTxHash = (txHash: string) => {
     setTxHash(txHash);
   }
-
+ 
   return (
     <div>
       <Head>
@@ -46,39 +46,42 @@ function Home() {
       </header>
       <main>
         {isConnected ?
-          <h1>Welcome to <a target="_blank" rel="noreferrer" href={`${currentNetworkEtherscanLink}`}>{` ${currentNetwork} `} Bridge Contract</a></h1>
+          <>
+            <h1>Welcome to <a target="_blank" rel="noreferrer" href={`${currentNetworkEtherscanLink}`}>{` ${currentNetwork} `} Bridge Contract</a></h1>
+
+            {isConnected && currentNetwork === "ropsten" &&
+              (<section>
+                <p> Current network : {currentNetwork}</p>
+                <NativeCurrencyBalance />
+                <TokenBalance tokenAddress={TOKEN_ADDRESS_ROPSTEN} symbol="TKN" />
+                <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} passTxHash={passTxHash} />
+              </section>)
+            }
+            {isConnected && currentNetwork === "rinkeby" && (
+              <section>
+                <p> Current network : {currentNetwork}</p>
+                <NativeCurrencyBalance />
+                <TokenBalance tokenAddress={TOKEN_ADDRESS_RINKEBY} symbol="TKN" />
+                <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} passTxHash={passTxHash} />
+              </section>
+            )
+            }
+            {!showTxHistory ?
+              <button onClick={() => { setShowTxHistory(true); setForTx(true) }}>show Tx History</button>
+              :
+              <>
+                {!loadingHasFinished ?
+                  <Loader forTx={forTx} />
+                  :
+                  <button onClick={() => { setShowTxHistory(false); setLoadingHasFinished(false) }}>hide Tx History </button>
+                }
+              </>
+            }
+            {showTxHistory && <TransactionHistory loadingTxsHasFinished={loadingTxsHasFinished} txHash={txHash} />}
+          </>
           :
           <h1>Please connect a wallet in order to use this Bridge Contract ...</h1>
         }
-        {isConnected && currentNetwork === "ropsten" &&
-          (<section>
-            <p> Current network : {currentNetwork}</p>
-            <NativeCurrencyBalance />
-            <TokenBalance tokenAddress={TOKEN_ADDRESS_ROPSTEN} symbol="TKN" />
-            <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} passTxHash={passTxHash}/>
-          </section>)
-        }
-        {isConnected && currentNetwork === "rinkeby" && (
-          <section>
-            <p> Current network : {currentNetwork}</p>
-            <NativeCurrencyBalance />
-            <TokenBalance tokenAddress={TOKEN_ADDRESS_RINKEBY} symbol="TKN" />
-            <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} passTxHash={passTxHash}/>
-          </section>
-        )
-        }
-        {!showTxHistory ?
-          <button onClick={() => { setShowTxHistory(true); setForTx(true) }}>show Tx History</button>
-          :
-          <>
-            {!loadingHasFinished ?
-              <Loader forTx={forTx} />
-              :
-              <button onClick={() => { setShowTxHistory(false); setLoadingHasFinished(false) }}>hide Tx History </button>
-            }
-          </>
-        }
-        {showTxHistory && <TransactionHistory loadingTxsHasFinished={loadingTxsHasFinished} txHash={txHash}/>}
       </main>
       <style jsx>{`
         nav {

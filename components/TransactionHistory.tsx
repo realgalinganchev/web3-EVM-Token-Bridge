@@ -24,27 +24,6 @@ export const TransactionHistory = ({ ...props }) => {
             'X-Master-Key': token
         }
     };
-    // useEffect(() => {
-    //     if (props.txHash.length > 0) {
-    //         const getUrl = "https://api.jsonbin.io/v3/c/uncategorized/bins";
-    //         axios
-    //             .get(getUrl, axiosHeaders)
-    //             .then(response =>
-    //                 setBinIdUrls(response.data.map((r: { record: any; }) => `https://api.jsonbin.io/v3/b/${r.record}/latest`)));
-    //     }
-    //     if (binIdUrls.length > 0) {
-    //         binIdUrls.forEach(async (currBinId, id) => {
-    //             await axios
-    //                 .get(currBinId, axiosHeaders)
-    //                 .then(response =>
-    //                     setTransactionHistory(transactionHistory => [...transactionHistory, response.data.record]))
-    //                 .catch(err => err);
-    //         })
-    //     }
-    //     console.log(transactionHistory.sort(function (b, a) {
-    //         return a.timestamp.localeCompare(b.timestamp)[0];
-    //     }))
-    // }, [])
 
     useEffect(() => {
         const getUrl = "https://api.jsonbin.io/v3/c/uncategorized/bins";
@@ -55,7 +34,7 @@ export const TransactionHistory = ({ ...props }) => {
     }, [])
 
     useEffect(() => {
-        if (transactionHistory.length > 0 && transactionHistory.length === binIdUrls.length) {
+        if (transactionHistory.length > 0 && transactionHistory.length === 3) {
             loadingTxsHasFinished(true);
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
