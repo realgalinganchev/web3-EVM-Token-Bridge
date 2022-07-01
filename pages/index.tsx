@@ -8,28 +8,14 @@ import Bridge from "../components/Bridge";
 import { TOKEN_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_ROPSTEN, TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_RINKEBY } from "../constants";
 import useEagerConnect from "../hooks/useEagerConnect";
 import { formatEtherscanLink } from "../util";
-import { useState } from "react";
-import { TransactionHistory } from "../components/TransactionHistory";
-import Loader from "../components/Loader";
 
 function Home() {
   const { account, library, chainId } = useWeb3React();
   const triedToEagerConnect = useEagerConnect();
-  const [showTxHistory, setShowTxHistory] = useState<boolean | undefined>(false);
-  const [loadingHasFinished, setLoadingHasFinished] = useState<boolean | undefined>(false);
-  const [forTx, setForTx] = useState<boolean | undefined>(false);
-  const [txHash, setTxHash] = useState<string | undefined>("");
   const isConnected = typeof account === "string" && !!library;
   const currentNetworkEtherscanLink = formatEtherscanLink("Account", [chainId, account]);
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
-  const loadingTxsHasFinished = (hasFinished: boolean) => {
-    setLoadingHasFinished(hasFinished)
-  }
 
-  const passTxHash = (txHash: string) => {
-    setTxHash(txHash);
-  }
- 
   return (
     <div>
       <Head>
@@ -54,7 +40,7 @@ function Home() {
                 <p> Current network : {currentNetwork}</p>
                 <NativeCurrencyBalance />
                 <TokenBalance tokenAddress={TOKEN_ADDRESS_ROPSTEN} symbol="TKN" />
-                <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} passTxHash={passTxHash} />
+                <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} />
               </section>)
             }
             {isConnected && currentNetwork === "rinkeby" && (
@@ -62,22 +48,10 @@ function Home() {
                 <p> Current network : {currentNetwork}</p>
                 <NativeCurrencyBalance />
                 <TokenBalance tokenAddress={TOKEN_ADDRESS_RINKEBY} symbol="TKN" />
-                <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} passTxHash={passTxHash} />
+                <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} />
               </section>
             )
             }
-            {!showTxHistory ?
-              <button onClick={() => { setShowTxHistory(true); setForTx(true) }}>show Tx History</button>
-              :
-              <>
-                {!loadingHasFinished ?
-                  <Loader forTx={forTx} />
-                  :
-                  <button onClick={() => { setShowTxHistory(false); setLoadingHasFinished(false) }}>hide Tx History </button>
-                }
-              </>
-            }
-            {showTxHistory && <TransactionHistory loadingTxsHasFinished={loadingTxsHasFinished} txHash={txHash} />}
           </>
           :
           <h1>Please connect a wallet in order to use this Bridge Contract ...</h1>

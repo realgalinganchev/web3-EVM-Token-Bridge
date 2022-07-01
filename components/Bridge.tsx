@@ -5,18 +5,19 @@ import { signERC2612Permit } from "eth-permit";
 import { formatEtherscanLink } from "../util";
 import { parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
-import axios from "axios";
 import useBridgeContract from "../hooks/useBridgeContract";
 import Loader from "./Loader";
 import { TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY, TOKEN_ADDRESS_ROPSTEN } from "../constants";
-
+import getFormattedArrayOfStructs from "../utils/formatStructToITransaction";
+import { ITransaction } from "../interfaces/ITransaction";
 
 type IBridgeContract = {
   contractAddress: string;
-  passTxHash: (txHash: string) => void;
 };
 
-const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
+
+
+const Bridge = ({ contractAddress }: IBridgeContract) => {
   const { account, library, chainId } = useWeb3React<Web3Provider>();
   const bridgeContract = useBridgeContract(contractAddress);
   const [isLoading, setIsLoading] = useState<boolean | undefined>(false);
@@ -25,6 +26,7 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
   const [errorMessage, setErrorMessage] = useState<string | undefined>('');
   const amountRef = useRef<HTMLInputElement | undefined>(null);
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
+  const [transactionHistory, setTransactionHistory] = useState<ITransaction[]>([]);
 
   const token = "$2b$10$sdKpbNf7n/UgK4PIONrK6.Kwgp6DOZ6WZB103YCgfzEboDOleD/Yu";
   const axiosHeaders = {
@@ -35,69 +37,14 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
 
 
 
-  const fetchLatestBinUrl = (txHash: string) => {
-
-    try {
-      const fetchData = async () => {
-        const getUrlAll = "https://api.jsonbin.io/v3/c/uncategorized/bins";
-        // const getUrlSingle = `https://api.jsonbin.io/v3/b/${r.record}/latest`;
-        // const updateUrlSingle = `https://api.jsonbin.io/v3/b/${r.record}`;
-        let latestBinUrl: string = "";
-        // Make first two requests
-        // const [firstResponse, secondResponse] = await Promise.all([
-        await axios
-          .get(getUrlAll, axiosHeaders)
-          .then(response =>
-            response.data.map((r: { record: any; }) =>
-              console.log('latestBinUrl :>> ', `https://api.jsonbin.io/v3/b/${r.record}`)));
-        //axios.get(getUrlSingle, axiosHeaders)
-        //axios.put(updateUrlSingle, data, axiosHeaders);
-        // ]);
-
-        // console.log("firstResponse.data:", firstResponse.data)
-        // console.log("secondResponse.data:", secondResponse.data)
-        // const thirdResponse = await axios.get('https://maps.googleapis.com/maps/api/directions/json?origin=place_id:' + firstResponse.data.results.place_id + '&destination=place_id:' + secondResponse.data.results.place_id + '&key=' + 'API-KEY-HIDDEN');
-
-      }
-      fetchData();
+  useEffect(() => {
+    async function fetchData() {
+      const arrOfStructs = await bridgeContract.getTransactionHistory()
+      const formattedArrOfTxs: any[] = getFormattedArrayOfStructs(arrOfStructs);
+      setTransactionHistory(formattedArrOfTxs);
     }
-    catch (err) {
-      console.log(err)
-    }
-
-  }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-
-
-  //     // Make third request using responses from the first two
-
-  //     // Update state once with all 3 responses
-  //     this.setState({
-  //       p1Location: firstResponse.data,
-  //       p2Location: secondResponse.data,
-  //       route: thirdResponse.data,
-  //     });
-
-  //     axios
-  //       .get(getUrl, axiosHeaders)
-  //       .then(response =>
-  //         setBinIdUrls(response.data.map((r: { record: any; }) => `https://api.jsonbin.io/v3/b/${r.record}/latest`)));
-  //   }
-  //   if (binIdUrls.length > 0) {
-  //     binIdUrls.forEach(async (currBinId, id) => {
-  //       await axios
-  //         .get(currBinId, axiosHeaders)
-  //         .then(response =>
-  //           setTransactionHistory(transactionHistory => [...transactionHistory, response.data.record]))
-  //         .catch(err => err);
-  //     })
-  //   }
-  //   console.log(transactionHistory.sort(function (b, a) {
-  //     return a.timestamp.localeCompare(b.timestamp)[0];
-  //   }))
-  // }, [])
-
-
+    fetchData();
+  }, [])
 
   const displayErrorReason = (err: any) => {
     if (err.error) {
@@ -134,8 +81,6 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
         );
         setIsLoading(true);
         setTxHash(lockTx.hash);
-        fetchLatestBinUrl(lockTx.hash)
-        passTxHash(lockTx.hash)
         setTxAmount(lockValue);
         await lockTx.wait();
         amountRef.current.value = '';
@@ -154,7 +99,6 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
         const unlockTx = await bridgeContract.unlock(unlockValue);
         setIsLoading(true);
         setTxHash(unlockTx.hash);
-        passTxHash(unlockTx.hash)
         setTxAmount(unlockValue);
         await unlockTx.wait();
         amountRef.current.value = '';
@@ -196,6 +140,34 @@ const Bridge = ({ contractAddress, passTxHash }: IBridgeContract) => {
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       {isLoading && <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} forTx={false} />}
+
+      {
+        <div >{transactionHistory && transactionHistory.sort(function (b, a) {
+            return a.timestamp.localeCompare(b.timestamp);
+          })
+          .map((transaction: ITransaction, index: number) => {
+            return (
+              <div key={index}>
+                <div>
+                  ...{transaction.sender.substring(transaction.receiver.length - 4)} has
+                  triggered {transaction.eventName} for {transaction.value} TKN
+                  to ...{transaction.receiver.substring(transaction.receiver.length - 4)} {' '}
+                  on {transaction.timestamp}
+                </div>
+                <div>
+                  <a
+                    href={"https://rinkeby.etherscan.io/tx/${transaction.txHash}"}
+                    target='_blank'
+                    rel='noreferrer'
+                  >
+                    View on Etherscan
+                  </a>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      }
       <style jsx>{`
         .form {
           display: flex;
