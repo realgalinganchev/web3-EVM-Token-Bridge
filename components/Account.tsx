@@ -1,16 +1,14 @@
 import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
 import { useEffect, useState } from "react";
-import { injected, walletConnect } from "../connectors";
+import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
-import { formatEtherscanLink, shortenHex } from "../util";
+import { IAccount } from "../interfaces/IAccount";
+import { formatEtherscanLink } from "../util";
 
-type AccountProps = {
-  triedToEagerConnect: boolean;
-};
 
-const Account = ({ triedToEagerConnect }: AccountProps) => {
+const Account = ({ triedToEagerConnect }: IAccount) => {
   const { active, error, activate, deactivate, chainId, account, setError } =
     useWeb3React();
 
@@ -48,7 +46,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
             disabled={connecting}
             onClick={() => {
               setConnecting(true);
-
               activate(injected, undefined, true).catch((error) => {
                 // ignore the error if it's a user rejected request
                 if (error instanceof UserRejectedRequestError) {
@@ -61,26 +58,9 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
           >
             {isMetaMaskInstalled ? "Connect to MetaMask" : "Connect to Wallet"}
           </button>
-
         ) : (
           <button onClick={startOnboarding}>Install Metamask</button>
         )}
-            {/* {(<button
-              disabled={connecting}
-              onClick={async () => {
-                try {
-                  await activate(walletConnect(), undefined, true)
-                } catch (e) {
-                  if (error instanceof UserRejectedRequestError) {
-                    setConnecting(false);
-                  } else {
-                    setError(error);
-                  }
-                }
-              }}>
-              Wallet Connect
-            </button>)
-            } */}
       </div>
     );
   }
@@ -95,9 +75,7 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         }}
       >
         {ENSName || account}
-        
       </a>
-      
       <button
         onClick={async () => {
           try {
@@ -109,8 +87,6 @@ const Account = ({ triedToEagerConnect }: AccountProps) => {
         Disconnect
       </button>
     </>
-
-
   );
 };
 

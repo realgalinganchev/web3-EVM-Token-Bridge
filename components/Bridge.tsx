@@ -2,20 +2,14 @@ import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
 import { useEffect, useRef, useState } from "react";
 import { signERC2612Permit } from "eth-permit";
-import { formatEtherscanLink } from "../util";
+import { formatEtherscanLink, formatStructToITransaction } from "../util";
 import { parseEther } from "ethers/lib/utils";
 import { BigNumber } from "ethers";
 import useBridgeContract from "../hooks/useBridgeContract";
 import Loader from "./Loader";
 import { TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY, TOKEN_ADDRESS_ROPSTEN } from "../constants";
-import getFormattedArrayOfStructs from "../utils/formatStructToITransaction";
 import { ITransaction } from "../interfaces/ITransaction";
-
-type IBridgeContract = {
-  contractAddress: string;
-};
-
-
+import { IBridgeContract } from "../interfaces/IBridgeContract";
 
 const Bridge = ({ contractAddress }: IBridgeContract) => {
   const { account, library, chainId } = useWeb3React<Web3Provider>();
@@ -28,23 +22,17 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
   const [transactionHistory, setTransactionHistory] = useState<ITransaction[]>([]);
 
-  const token = "$2b$10$sdKpbNf7n/UgK4PIONrK6.Kwgp6DOZ6WZB103YCgfzEboDOleD/Yu";
-  const axiosHeaders = {
-    headers: {
-      'X-Master-Key': token
-    }
-  };
-
-
-
   useEffect(() => {
-    async function fetchData() {
-      const arrOfStructs = await bridgeContract.getTransactionHistory()
-      const formattedArrOfTxs: any[] = getFormattedArrayOfStructs(arrOfStructs);
-      setTransactionHistory(formattedArrOfTxs);
+    if (isLoading) {
+      const fetchData = async () => {
+        const arrOfStructs = await bridgeContract.getTransactionHistory()
+        const formattedArrOfTxs: any[] = formatStructToITransaction(arrOfStructs);
+        setTransactionHistory(formattedArrOfTxs);
+      }
+      fetchData();
     }
-    fetchData();
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoading])
 
   const displayErrorReason = (err: any) => {
     if (err.error) {
@@ -123,7 +111,6 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
               <button onClick={() => sendTokensToTargetChain(TOKEN_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_ROPSTEN)}>Bridge to rinkeby</button>
               <button onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on ropsten</button>
             </div>
-
           </section>
           :
           <section>
@@ -140,32 +127,25 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       {isLoading && <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} forTx={false} />}
-
       {
-        <div >{transactionHistory && transactionHistory.sort(function (b, a) {
-            return a.timestamp.localeCompare(b.timestamp);
-          })
-          .map((transaction: ITransaction, index: number) => {
-            return (
-              <div key={index}>
-                <div>
-                  ...{transaction.sender.substring(transaction.receiver.length - 4)} has
-                  triggered {transaction.eventName} for {transaction.value} TKN
-                  to ...{transaction.receiver.substring(transaction.receiver.length - 4)} {' '}
-                  on {transaction.timestamp}
+        <div>{transactionHistory &&
+          transactionHistory
+            .sort(function (b, a) {
+              return a.timestamp.localeCompare(b.timestamp);
+            })
+            .filter(tx => tx.sender === account || tx.receiver === account)
+            .map((transaction: ITransaction, index: number) => {
+              return (
+                <div key={index}>
+                  <div>
+                    ...{transaction.sender.substring(transaction.receiver.length - 4)} has
+                    triggered {transaction.eventName} for {transaction.value} TKN
+                    to ...{transaction.receiver.substring(transaction.receiver.length - 4)} {' '}
+                    on {transaction.timestamp}
+                  </div>
                 </div>
-                <div>
-                  <a
-                    href={"https://rinkeby.etherscan.io/tx/${transaction.txHash}"}
-                    target='_blank'
-                    rel='noreferrer'
-                  >
-                    View on Etherscan
-                  </a>
-                </div>
-              </div>
-            )
-          })}
+              )
+            })}
         </div>
       }
       <style jsx>{`
@@ -187,10 +167,6 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         button {
           width: 200px;
           margin: 0 auto;
-        }
-
-        .flex{
-
         }
 
         .error-message {
