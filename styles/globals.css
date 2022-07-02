@@ -61,12 +61,15 @@ background: transparent;
   font-weight: bold;
   line-height: 43px;
   cursor: pointer;
+  opacity: 0.8;
+  box-shadow: 0px 4px 0px #999;
 }
+
 .active:after {
   content: "";
   border-style: solid;
   border-width: 38px 0px 40px 40px;
-  border-color: transparent transparent transparent #FF7E3E;
+  border-color: transparent transparent transparent #914925;
   display: block;
   margin-left: 143px;
   -webkit-transform: translateY(75%);
@@ -75,7 +78,11 @@ background: transparent;
   bottom: 114px;
   margin-bottom: -3px;
   position: relative;
-  cursor: pointer;
+  opacity: 0.8;
+}
+
+.active:hover {
+  background: #914925;
 }
 
 .active:disabled {

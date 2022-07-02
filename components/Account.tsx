@@ -149,7 +149,7 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
             >
               <div>
                 {
-                  isMetaMaskInstalled ? "Connect Accounts" : "Connect to Wallet"
+                  isMetaMaskInstalled ? "Connect a wallet" : "Connect to Wallet"
                 }
               </div>
             </button>

@@ -9,7 +9,7 @@ const TokenBalance = ({ tokenAddress, symbol }: ITokenBalance) => {
   const { data } = useTokenBalance(account, tokenAddress);
 
   return (
-    <p>
+    <p style={{ bottom: "50px", position: "relative", fontSize: "23px" }}>
       {`Token Balance: ${symbol} `}{parseBalance(data ?? 0)}
     </p>
   );

@@ -91,19 +91,27 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
   const amountRef = useRef<HTMLInputElement | undefined>(null);
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
   const [transactionHistory, setTransactionHistory] = useState<ITransaction[]>([]);
+  const [showTransactionHistory, setShowTransactionHistory] = useState<boolean | undefined>(false);
   const styles = useStyles();
 
-  useEffect(() => {
-    if (isLoading) {
-      const fetchData = async () => {
-        const arrOfStructs = await bridgeContract.getTransactionHistory()
-        const formattedArrOfTxs: any[] = formatStructToITransaction(arrOfStructs);
-        setTransactionHistory(formattedArrOfTxs);
-      }
-      fetchData();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoading])
+  // useEffect(() => {
+  //   if (isLoading) {
+  //     const fetchData = async () => {
+  //       const arrOfStructs = await bridgeContract.getTransactionHistory()
+  //       const formattedArrOfTxs: any[] = formatStructToITransaction(arrOfStructs);
+  //       setTransactionHistory(formattedArrOfTxs);
+  //     }
+  //     fetchData();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [isLoading])
+
+  const loadTxHistory = async function () {
+    const arrOfStructs = await bridgeContract.getTransactionHistory()
+    const formattedArrOfTxs: any[] = formatStructToITransaction(arrOfStructs);
+    setTransactionHistory(formattedArrOfTxs);
+    setShowTransactionHistory(true);
+  }
 
   const displayErrorReason = (err: any) => {
     if (err.error) {
@@ -229,9 +237,14 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
                 </FormControl>
               </Box>
             </div>
-            <div className="flex">
-              <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
-            </div>
+            {isLoading ?
+              <div className="loader">
+                <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />
+              </div> :
+              <div className="flex">
+                <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
+              </div>
+            }
           </div>
           :
           <div className="wrapper">
@@ -254,15 +267,28 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
                 </FormControl>
               </Box>
             </div>
+            {isLoading ?
+              <div className="loader">
+                <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />
+              </div>
+              :
+              <div className="flex">
+                <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
+              </div>
+            }
             <div className="flex">
-              <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
+              {!showTransactionHistory ?
+                <button className="unlock" onClick={() => loadTxHistory()}>{"Show Tx History"}</button>
+                :
+                <button className="unlock" onClick={() => setShowTransactionHistory(false)}>{"Hide Tx History"}</button>
+              }
+
             </div>
           </div>
         }
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {isLoading && <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} forTx={false} />}
-      {
+      {showTransactionHistory &&
         <div>{transactionHistory &&
           transactionHistory
             .sort(function (b, a) {
@@ -284,6 +310,12 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         </div>
       }
       <style jsx>{`
+
+        .loader {
+          position: relative;
+          top: 4em;
+        }
+
         .form {
           display: flex;
           flex-direction: column;
@@ -308,14 +340,8 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           border: 1px solid rgb(97, 97, 97);
           border-radius: 16px;
           padding: 100px;
-          color: rgb(37, 106, 184);
           border-radius: 25%;
           height: 625px;
-        }
-
-        .wrapper p {
-          position: relative;
-          bottom: 50px;
         }
 
         .error-message {
@@ -346,7 +372,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           padding: 0px;
           appearance: textfield;
           filter: none;
-          opacity: 1;
+          opacity: 0.7;
           transition: opacity 0.2s ease-in-out 0s;
           text-align: left;
           border-radius: 5px;
@@ -368,6 +394,12 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           text-transform: uppercase;
           font-weight: bold;
           cursor: pointer;
+          opacity: 0.8;
+          box-shadow: 0px 4px 0px #999;
+        }
+
+        .unlock:hover {
+          background: #914925;
         }
       `}</style>
     </div >
