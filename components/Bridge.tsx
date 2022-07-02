@@ -157,6 +157,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
             permit.s
           );
           setIsLoading(true);
+          setShowTransactionHistory(false)
           setTxHash(lockTx.hash);
           setTxAmount(lockValue);
           await lockTx.wait();
@@ -179,6 +180,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         try {
           const unlockTx = await bridgeContract.unlock(unlockValue);
           setIsLoading(true);
+          setShowTransactionHistory(false)
           setTxHash(unlockTx.hash);
           setTxAmount(unlockValue);
           await unlockTx.wait();
@@ -241,10 +243,20 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
               <div className="loader">
                 <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />
               </div> :
-              <div className="flex">
-                <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
-              </div>
+              <>
+                <div className="flex">
+                  <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
+                </div>
+                <div className="flex">
+                  {!showTransactionHistory ?
+                    <button className="unlock" onClick={() => loadTxHistory()}>{"Show Tx History"}</button>
+                    :
+                    <button className="unlock" onClick={() => setShowTransactionHistory(false)}>{"Hide Tx History"}</button>
+                  }
+                </div>
+              </>
             }
+
           </div>
           :
           <div className="wrapper">
@@ -272,23 +284,25 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
                 <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />
               </div>
               :
-              <div className="flex">
-                <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
-              </div>
+              <>
+                <div className="flex">
+                  <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
+                </div>
+                <div className="flex">
+                  {!showTransactionHistory ?
+                    <button className="unlock" onClick={() => loadTxHistory()}>{"Show Tx History"}</button>
+                    :
+                    <button className="unlock" onClick={() => setShowTransactionHistory(false)}>{"Hide Tx History"}</button>
+                  }
+                </div>
+              </>
             }
-            <div className="flex">
-              {!showTransactionHistory ?
-                <button className="unlock" onClick={() => loadTxHistory()}>{"Show Tx History"}</button>
-                :
-                <button className="unlock" onClick={() => setShowTransactionHistory(false)}>{"Hide Tx History"}</button>
-              }
-
-            </div>
           </div>
         }
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {showTransactionHistory &&
+      {
+        showTransactionHistory &&
         <div>{transactionHistory &&
           transactionHistory
             .sort(function (b, a) {
