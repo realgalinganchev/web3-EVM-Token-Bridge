@@ -1,0 +1,9 @@
+@font-face {
+    font-family: 'Styrene A Web';
+    src: local('Styrene A Web Light'), local('Styrene-A-Web-Light'),
+        url('StyreneAWeb-Light.woff2') format('woff2'),
+        url('StyreneAWeb-Light.woff') format('woff'),
+        url('StyreneAWeb-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+  }

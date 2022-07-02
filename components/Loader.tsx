@@ -29,7 +29,7 @@ export default function Loader({ ...props }) {
 
             <style jsx>{`
             a {
-                background-color: #FF7A59;
+                background-color: #FF7E3E;
                 color: white;
                 padding: 15px 25px;
                 text-decoration: none;
@@ -38,9 +38,9 @@ export default function Loader({ ...props }) {
 
             .loader {
                 margin: auto;
-                border: 20px solid #EAF0F6;
+                border: 20px solid #FF7E3E;
                 border-radius: 50%;
-                border-top: 20px solid #FF7A59;
+                border-top: 20px solid #FF7E3E;
                 width: 100px;
                 height: 100px;
                 animation: spinner 4s linear infinite;
