@@ -5,12 +5,18 @@ import Bridge from "../components/Bridge";
 import useEagerConnect from "../hooks/useEagerConnect";
 import { formatEtherscanLink } from "../util";
 import { BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY } from "../constants";
+import { useState } from "react";
 
 function Home() {
   const { account, library, chainId } = useWeb3React();
   const triedToEagerConnect = useEagerConnect();
   const isConnected = typeof account === "string" && !!library;
   const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>('');
+
+  const sendExternalErrorMessage =  function (err: string) {
+    setErrorMessage(err)
+  }
 
   return (
     <div id="root">
@@ -22,17 +28,17 @@ function Home() {
         <nav>
           <span>ΞTHER⇔₱ORTΞR</span>
           <div className="dummy"></div>
-          <Account triedToEagerConnect={triedToEagerConnect} />
+          <Account triedToEagerConnect={triedToEagerConnect} sendExternalErrorMessage={sendExternalErrorMessage}/>
         </nav>
       </header>
       <main>
         {isConnected ?
           <>
             {isConnected && currentNetwork === "ropsten" &&
-              <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} />
+              <Bridge contractAddress={BRIDGE_ADDRESS_ROPSTEN} err={errorMessage} />
             }
             {isConnected && currentNetwork === "rinkeby" &&
-              <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} />
+              <Bridge contractAddress={BRIDGE_ADDRESS_RINKEBY} err={errorMessage} />
             }
           </>
           :

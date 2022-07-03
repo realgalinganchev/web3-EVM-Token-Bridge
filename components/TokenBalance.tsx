@@ -11,11 +11,11 @@ const TokenBalance = ({ tokenAddress, symbol }: ITokenBalance) => {
 
   return (
     <>
-      <p style={{ bottom: "90px", position: "relative", fontSize: "23px", margin: "0px", padding: "0px" }}>
-        <span style={{ fontWeight: "500" }}>Connected account: </span><span style={{ fontWeight: "200" }}>{account && `${shortenHex(account, 4)}`}</span>
+      <div style={{ bottom: "90px", position: "relative", fontSize: "23px", margin: "0px", padding: "0px" }}>
+        <span style={{ fontWeight: "500" }}>Connected account: </span><span style={{ fontWeight: "200", fontStyle: "italic" }}>{account && `${shortenHex(account, 4)}`}</span>
         <NativeCurrencyBalance />
         <span style={{ fontWeight: "500" }}>Token Balance: </span><span style={{ fontWeight: "200" }}>{symbol + " " + parseBalance(data ?? 0)}</span>
-      </p>
+      </div>
     </>
 
   );

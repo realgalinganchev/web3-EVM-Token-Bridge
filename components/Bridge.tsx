@@ -1,6 +1,6 @@
 import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { signERC2612Permit } from "eth-permit";
 import { formatEtherscanLink, formatStructToITransaction } from "../util";
 import { parseEther } from "ethers/lib/utils";
@@ -50,7 +50,7 @@ const myStyles = {
   },
 } as any;
 
-const Bridge = ({ contractAddress }: IBridgeContract) => {
+const Bridge = ({ contractAddress, err }: IBridgeContract) => {
   const amountRef = useRef<HTMLInputElement | undefined>(null);
   const [txHash, setTxHash] = useState<string | undefined>("");
   const [isLoading, setIsLoading] = useState<boolean | undefined>(false);
@@ -73,6 +73,12 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
     setShowTransactionHistory(true);
   }
 
+  useEffect(() => {
+    if (err.length > 0) {
+      displayErrorReason(err);
+    }
+  }, [err]);
+
   const displayErrorReason = (err: any) => {
     if (err.error) {
       setErrorMessage(err.error.message.slice(20));
@@ -88,9 +94,9 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
       setErrorMessage(err);
       setTimeout(() => {
         setErrorMessage('')
+        err = "";
       }, 3000);
     }
-
     setIsLoading(false);
   }
 
@@ -242,7 +248,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           flex-direction: column;
           margin: 0;
           position: absolute;
-          top: 45%;
+          top: 48%;   
           left: 50%;
           -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
@@ -276,6 +282,8 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
 	        background-color: #FFBABA;
           border-radius: 25%;
           height: 80px;
+          align-items: center;
+          display: flex;
         }
 
         .loader {

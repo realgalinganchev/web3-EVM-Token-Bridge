@@ -43,7 +43,7 @@ const myStyles = {
     marginRight: "1em",
     lineHeight: "55px"
   },
-  
+
   button: {
     cursor: "pointer",
     margin: "0 20px",
@@ -76,7 +76,7 @@ const myStyles = {
   },
 } as any;
 
-const Account = ({ triedToEagerConnect }: IAccount) => {
+const Account = ({ triedToEagerConnect, sendExternalErrorMessage }: IAccount) => {
   const styles = useStyles();
   const amountRef = useRef<HTMLInputElement | undefined>(null);
   const [connecting, setConnecting] = useState(false);
@@ -107,8 +107,8 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
     await changeNetwork({ networkName, setError });
   };
 
-  const networkChanged = (chainId) => {
-    console.log({ chainId });
+  const networkChanged = (chainId: any) => {
+    console.log('chainId :>> ', chainId);
   };
 
   const ENSName = useENSName(account);
@@ -124,7 +124,10 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
   const addTokenFunction = async () => {
     // @ts-ignore
     if (amountRef?.current?.value == 0) {
-      //displayErrorReason("Please enter an amount to bridge!");
+      sendExternalErrorMessage("Please provide a valid token address.");
+      setTimeout(() => {
+        sendExternalErrorMessage("")
+      }, 3000);
     } else {
       if (typeof window.ethereum !== 'undefined') {
         try {
@@ -208,7 +211,15 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
             ...networks[networkName]
           }
         ]
-      }).then((txHash) => console.log(txHash))
+      })
+        .then((txHash) => {
+          if (txHash === null) {
+            sendExternalErrorMessage("You are already connected to this network.");
+            setTimeout(() => {
+              sendExternalErrorMessage("")
+            }, 3000);
+          }
+        })
         .catch((error) => console.error);;
     } catch (err) {
       setError(err.message);
@@ -233,7 +244,6 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
         </FormControl>
       </Box>
       <div style={myStyles.container}>
-
         <button
           style={myStyles.button}
           onClick={async () => {

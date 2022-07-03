@@ -8,9 +8,9 @@ const NativeCurrencyBalance = () => {
   const { data } = useNativeCurrencyBalance(account);
 
   return (
-    <p style={{ fontSize: "23px", margin: "0px", padding: "0px" }}> 
+    <div style={{ fontSize: "23px", margin: "0px", padding: "0px" }}> 
      <span style={{ fontWeight: "500"}}>ETH Balance: Ξ </span><span style={{ fontWeight: "200"}}>{parseBalance(data ?? 0)}</span>
-     </p>
+     </div>
   )
 
 };
