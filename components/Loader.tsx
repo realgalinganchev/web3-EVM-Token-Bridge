@@ -45,7 +45,7 @@ export default function Loader({ ...props }) {
 
               .txInfo{
                 position: relative;
-                top: 5.7em;
+                top: 4em;
               }
 
               .txInfo p {
