@@ -1,6 +1,6 @@
 import type { Web3Provider } from "@ethersproject/providers";
 import { useWeb3React } from "@web3-react/core";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { signERC2612Permit } from "eth-permit";
 import { formatEtherscanLink, formatStructToITransaction } from "../util";
 import { parseEther } from "ethers/lib/utils";
@@ -18,46 +18,19 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
 const useStyles = makeStyles({
-  iconStyle: {
-    background: "transparent",
-    outline: 0,
-    border: 0,
-    cursor: "pointer",
-    verticalAlign: "middle",
-    textAlign: "center",
-    overflow: "visible",
-    margin: 10,
-    color: "#FF7E3E",
-    lineHeight: "55px"
-  },
   select: {
     borderRadius: "25%",
     height: "50px",
     color: "#FF7E3E",
     width: "12em",
     background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
-  }
+    "& .MuiSvgIcon-root": {
+      color: "#FF7E3E",
+    },
+  },
 });
 
 const myStyles = {
-  container: {
-    marginRight: "1em",
-    lineHeight: "55px"
-  },
-  button: {
-    margin: "0 20px",
-    display: "inline",
-    border: "1px solid rgb(37, 106, 184)",
-    justifyContent: "center",
-    borderRadius: "25%",
-    height: "50px",
-    color: "#FF7E3E",
-    width: "12em",
-    background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
-  },
-  dropdown: {
-    color: "#FF7E3E",
-  },
   menuItem: {
     marginBottom: "10px",
     border: "1px solid rgb(37, 106, 184)",
@@ -69,9 +42,6 @@ const myStyles = {
     width: "12em",
     background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
   },
-  inputLabel: {
-    color: "#FF7E3E",
-  },
   select: {
     color: "#FF7E3E",
     border: "1px solid rgb(37, 106, 184)",
@@ -82,33 +52,24 @@ const myStyles = {
 } as any;
 
 const Bridge = ({ contractAddress }: IBridgeContract) => {
-  const { account, library, chainId } = useWeb3React<Web3Provider>();
-  const bridgeContract = useBridgeContract(contractAddress);
-  const [isLoading, setIsLoading] = useState<boolean | undefined>(false);
-  const [txHash, setTxHash] = useState<string | undefined>("");
-  const [txAmount, setTxAmount] = useState<BigNumber | undefined>(BigNumber.from(0));
-  const [errorMessage, setErrorMessage] = useState<string | undefined>('');
   const amountRef = useRef<HTMLInputElement | undefined>(null);
-  const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
+  const [txHash, setTxHash] = useState<string | undefined>("");
+  const [isLoading, setIsLoading] = useState<boolean | undefined>(false);
+  const [errorMessage, setErrorMessage] = useState<string | undefined>('');
+  const [targetNetworkData, setTargetNetworkData] = useState<string[]>(["", ""]);
   const [transactionHistory, setTransactionHistory] = useState<ITransaction[]>([]);
+  const [txAmount, setTxAmount] = useState<BigNumber | undefined>(BigNumber.from(0));
   const [showTransactionHistory, setShowTransactionHistory] = useState<boolean | undefined>(false);
-  const styles = useStyles();
 
-  // useEffect(() => {
-  //   if (isLoading) {
-  //     const fetchData = async () => {
-  //       const arrOfStructs = await bridgeContract.getTransactionHistory()
-  //       const formattedArrOfTxs: any[] = formatStructToITransaction(arrOfStructs);
-  //       setTransactionHistory(formattedArrOfTxs);
-  //     }
-  //     fetchData();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [isLoading])
+  const styles = useStyles();
+  const bridgeContract = useBridgeContract(contractAddress);
+  const { account, library, chainId } = useWeb3React<Web3Provider>();
+  const currentNetwork: string = formatEtherscanLink("Account", [chainId, account]).slice(8, 15);
+
 
   const loadTxHistory = async function () {
     const arrOfStructs = await bridgeContract.getTransactionHistory()
-    const formattedArrOfTxs: any[] = formatStructToITransaction(arrOfStructs);
+    const formattedArrOfTxs: any[] = formatStructToITransaction(arrOfStructs, account);
     setTransactionHistory(formattedArrOfTxs);
     setShowTransactionHistory(true);
   }
@@ -193,20 +154,14 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
     }
   }
 
-  const [targetNetworkData, setTargetNetworkData] = useState<string[]>(["", ""]);
   const changeTargetNetwork = async (networkName: string) => {
-
     switch (networkName) {
       case "ropsten":
         setTargetNetworkData([TOKEN_ADDRESS_RINKEBY, BRIDGE_ADDRESS_RINKEBY]);
-        console.log('targetNetworkData[0] :>> ', targetNetworkData[0]);
-        console.log('targetNetworkData[1] :>> ', targetNetworkData[1]);
         break;
 
       case "rinkeby":
         setTargetNetworkData([TOKEN_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_ROPSTEN]);
-        console.log('targetNetworkData[0] :>> ', targetNetworkData[0]);
-        console.log('targetNetworkData[1] :>> ', targetNetworkData[1]);
         break;
 
       default:
@@ -216,105 +171,57 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
 
   return (
     <div className="form">
-
       <div className="wrapper">
-        {currentNetwork === "ropsten" ?
-          <div className="wrapper">
-            <TokenBalance tokenAddress={TOKEN_ADDRESS_ROPSTEN} symbol={`${currentNetwork}TKN`} />
-            <div className="bridge-value">
-              <input ref={amountRef} type="text" id="price" placeholder="0.00" />
-              <button className="active" disabled={targetNetworkData[0].length === 0} onClick={() => sendTokensToTargetChain(targetNetworkData)}>
-                {targetNetworkData[0].length === 0 ? "target chain" : "Bridge to"}
-              </button>
-              <Box sx={{ minWidth: 120 }}>
-                <FormControl fullWidth>
-                  <Select
-                    style={myStyles.select}
-                    className={styles.select}
-                    value={targetNetworkData[0]}
-                  >
-                    <MenuItem value={TOKEN_ADDRESS_RINKEBY} style={myStyles.menuItem} onClick={() => changeTargetNetwork("ropsten")}>Ropsten</MenuItem>
-                    <MenuItem value={TOKEN_ADDRESS_ROPSTEN} style={myStyles.menuItem} onClick={() => changeTargetNetwork("rinkeby")}>Rinkeby</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-            </div>
-            {isLoading ?
-              <div className="loader">
-                <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />
-              </div> :
-              <>
-                <div className="flex">
-                  <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
-                </div>
-                <div className="flex">
-                  {!showTransactionHistory ?
-                    <button className="unlock" onClick={() => loadTxHistory()}>{"Show Tx History"}</button>
-                    :
-                    <button className="unlock" onClick={() => setShowTransactionHistory(false)}>{"Hide Tx History"}</button>
-                  }
-                </div>
-              </>
-            }
-
+        <div className="wrapper">
+          <TokenBalance tokenAddress={currentNetwork === "ropsten" ? TOKEN_ADDRESS_ROPSTEN : TOKEN_ADDRESS_RINKEBY} symbol={`${currentNetwork}TKN`} />
+          <div className="bridge-value">
+            <input ref={amountRef} type="text" id="price" placeholder="0.00" />
+            <button className="active" disabled={targetNetworkData[0].length === 0} onClick={() => sendTokensToTargetChain(targetNetworkData)}>
+              {targetNetworkData[0].length === 0 ? "choose target chain" : "Bridge to"}
+            </button>
+            <Box sx={{ minWidth: 120 }}>
+              <FormControl fullWidth>
+                <Select
+                  style={myStyles.select}
+                  className={styles.select}
+                  value={targetNetworkData[0]}
+                >
+                  <MenuItem value={TOKEN_ADDRESS_RINKEBY} style={myStyles.menuItem} onClick={() => changeTargetNetwork("ropsten")}>Ropsten</MenuItem>
+                  <MenuItem value={TOKEN_ADDRESS_ROPSTEN} style={myStyles.menuItem} onClick={() => changeTargetNetwork("rinkeby")}>Rinkeby</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
           </div>
-          :
-          <div className="wrapper">
-            <TokenBalance tokenAddress={TOKEN_ADDRESS_RINKEBY} symbol={`${currentNetwork}TKN`} />
-            <div className="bridge-value">
-              <input ref={amountRef} type="text" id="price" placeholder="0.00" />
-              <button className="active" disabled={targetNetworkData[0].length === 0} onClick={() => sendTokensToTargetChain(targetNetworkData)}>
-                {targetNetworkData[0].length === 0 ? "target chain" : "Bridge to"}
-              </button>
-              <Box sx={{ minWidth: 120 }}>
-                <FormControl fullWidth>
-                  <Select
-                    style={myStyles.select}
-                    className={styles.select}
-                    value={targetNetworkData[0]}
-                  >
-                    <MenuItem value={TOKEN_ADDRESS_RINKEBY} style={myStyles.menuItem} onClick={() => changeTargetNetwork("ropsten")}>Ropsten</MenuItem>
-                    <MenuItem value={TOKEN_ADDRESS_ROPSTEN} style={myStyles.menuItem} onClick={() => changeTargetNetwork("rinkeby")}>Rinkeby</MenuItem>
-                  </Select>
-                </FormControl>
-              </Box>
-            </div>
-            {isLoading ?
-              <div className="loader">
-                <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />
+          {isLoading ?
+            <div className="loader">
+              <Loader txHash={txHash} txAmount={txAmount} currentNetwork={currentNetwork} />
+            </div> :
+            <>
+              <div className="flex">
+                <button className="action-button" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
               </div>
-              :
-              <>
-                <div className="flex">
-                  <button className="unlock" onClick={() => unlockTokensOnTargetChain()}>Unlock tokens on {currentNetwork}</button>
-                </div>
-                <div className="flex">
-                  {!showTransactionHistory ?
-                    <button className="unlock" onClick={() => loadTxHistory()}>{"Show Tx History"}</button>
-                    :
-                    <button className="unlock" onClick={() => setShowTransactionHistory(false)}>{"Hide Tx History"}</button>
-                  }
-                </div>
-              </>
-            }
-          </div>
-        }
+              <div className="flex">
+                {!showTransactionHistory ?
+                  <button className="action-button" onClick={() => loadTxHistory()}>{"Show Tx History"}</button>
+                  :
+                  <button className="action-button" onClick={() => setShowTransactionHistory(false)}>{"Hide Tx History"}</button>
+                }
+              </div>
+            </>
+          }
+        </div>
       </div>
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       {
         showTransactionHistory &&
         <div>{transactionHistory &&
           transactionHistory
-            .sort(function (b, a) {
-              return a.timestamp.localeCompare(b.timestamp);
-            })
-            .filter(tx => tx.sender === account || tx.receiver === account)
             .map((transaction: ITransaction, index: number) => {
               return (
                 <div key={index}>
-                  <div>
-                    ...{transaction.sender.substring(transaction.receiver.length - 4)} has
-                    triggered {transaction.eventName} for {transaction.value} TKN
+                  <div className="transactions-wrapper">
+                    ...{transaction.sender.substring(transaction.sender.length - 4)} has{' '}
+                    {transaction.eventName}ed {transaction.value} TKN
                     to ...{transaction.receiver.substring(transaction.receiver.length - 4)} {' '}
                     on {transaction.timestamp}
                   </div>
@@ -324,18 +231,12 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         </div>
       }
       <style jsx>{`
-
-        .loader {
-          position: relative;
-          top: 4em;
-        }
-
         .form {
           display: flex;
           flex-direction: column;
           margin: 0;
           position: absolute;
-          top: 50%;
+          top: 45%;
           left: 50%;
           -ms-transform: translate(-50%, -50%);
           transform: translate(-50%, -50%);
@@ -351,7 +252,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
         }
         
         .wrapper{
-          border: 1px solid rgb(97, 97, 97);
+          border: 3px solid #FF7E3E;
           border-radius: 16px;
           padding: 100px;
           border-radius: 25%;
@@ -378,7 +279,7 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           outline: none;
           border: none;
           flex: 1 1 auto;
-          background-color: #FF7E3E;
+          background-color: #171E26;
           font-size: 28px;
           white-space: nowrap;
           overflow: hidden;
@@ -392,14 +293,12 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           border-radius: 5px;
           padding: 10px;
           width: 6em;
-          margin-right: 1em;  
-          border: 1px solid white;
+          border: 1px solid rgb(37, 106, 184);
         }
-
-        .unlock {
+        
+        .action-button {
           background-color: #FF7E3E;
           height: 55px;
-          margin-right: 50px;
           margin-top: 69px;
           border-radius: 15px;
           color: white;
@@ -410,13 +309,24 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           cursor: pointer;
           opacity: 0.8;
           box-shadow: 0px 4px 0px #999;
+          margin-right: 22px;
         }
 
         .unlock:hover {
           background: #914925;
         }
+
+        .loader {
+          position: relative;
+          top: 4em;
+        }
+
+        .transactions-wrapper{
+          font-weight: lighter;
+          font-style: italic;
+        }
       `}</style>
-    </div >
+    </div>
   );
 };
 

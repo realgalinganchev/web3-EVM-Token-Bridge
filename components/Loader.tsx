@@ -51,6 +51,7 @@ export default function Loader({ ...props }) {
               .txInfo p {
                 padding: 0;
                 margin: 0;
+                font-weight: lighter;
               }
 
               .txInfo a {

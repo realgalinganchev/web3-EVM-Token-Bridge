@@ -2,10 +2,9 @@ import { useWeb3React } from "@web3-react/core";
 import Head from "next/head";
 import Account from "../components/Account";
 import Bridge from "../components/Bridge";
-import { BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY } from "../constants";
 import useEagerConnect from "../hooks/useEagerConnect";
 import { formatEtherscanLink } from "../util";
-import { useState } from "react";
+import { BRIDGE_ADDRESS_ROPSTEN, BRIDGE_ADDRESS_RINKEBY } from "../constants";
 
 function Home() {
   const { account, library, chainId } = useWeb3React();
@@ -16,12 +15,12 @@ function Home() {
   return (
     <div id="root">
       <Head>
-        <title>Ξther⇔₱ortΞR</title>
+        <title>ΞTHER⇔₱ORTΞR</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <header>
         <nav>
-          <span>Ξther⇔₱ortΞR</span>
+          <span>ΞTHER⇔₱ORTΞR</span>
           <div className="dummy"></div>
           <Account triedToEagerConnect={triedToEagerConnect} />
         </nav>
@@ -37,13 +36,14 @@ function Home() {
             }
           </>
           :
-          <h1>Please connect a wallet in order to use Ξther⇔₱ortΞR</h1>
+          <h1>Please connect a wallet in order to use ΞTHER⇔₱ORTΞR</h1>
         }
         {currentNetwork.startsWith("e") &&
-          <h1>Product in Beta: Please connect to Rinkeby or Ropsten in order to use Ξther⇔₱ortΞR</h1>
+          <h1>Product in Beta: Please connect to Rinkeby or Ropsten in order to use ΞTHER⇔₱ORTΞR</h1>
         }
       </main>
       <style jsx>{`
+
         nav {
           display: flex;
           justify-content: space-between;
@@ -58,11 +58,12 @@ function Home() {
           margin-left: 3vw;
           text-transform: uppercase;
           line-height: 55px;
-          }
+          font-size: 20px;
+        }
 
         main {
-            text-align: center;
-          }
+          text-align: center;
+        }
 
         div#root{
           display: flex;
@@ -83,25 +84,6 @@ function Home() {
         .dummy {
           -webkit-box-flex: 1;
           flex-grow: 1;
-        }
-
-        .connectAccounts {
-          font-size: 0.8125rem;
-          display: inline-flex;
-          align-items: center;
-          -webkit-box-pack: center;
-          justify-content: center;
-          color: rgb(247, 248, 250);
-          white-space: nowrap;
-          vertical-align: middle;
-          box-sizing: border-box;
-          user-select: none;
-          -webkit-tap-highlight-color: transparent;
-          cursor: pointer;
-          background-color: transparent;
-          border: 1px solid rgb(97, 97, 97);
-          border-radius: 16px;
-          height: 40px;
         }
       `}</style>
     </div>

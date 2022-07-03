@@ -39,12 +39,12 @@ export const parseBalance = (
   decimalsToDisplay = 3
 ) => parseFloat(formatUnits(value, decimals)).toFixed(decimalsToDisplay);
 
-export function formatStructToITransaction(transactions: any[]) {
+export function formatStructToITransaction(transactions: any[], account: string) {
   const transactionsProps = BRIDGE_ABI
     .find((abi) => abi.name === "transactions")
     .outputs.map((p: any) => p.name);
 
-  const decodeTransactionsArray = (transactions: any[]) => {
+  const decodeTransactionsArray = (transactions: any[]): (any[]) => {
     return transactions.map((transaction) => {
       return Object.fromEntries(
         transaction.map((val: any, idx: number) => {
@@ -63,7 +63,15 @@ export function formatStructToITransaction(transactions: any[]) {
     return transactions;
   }
 
-  return formatToTransactionsArray(decodeTransactionsArray(transactions))
+  const sortFilterSliceArr = (transactionsArr: ITransaction[]): (ITransaction[]) => {
+    return transactionsArr.sort(function (b, a) {
+      return a.timestamp.localeCompare(b.timestamp);
+    })
+      .filter(tx => tx.sender === account || tx.receiver === account)
+      .slice(0, 4)
+  }
+
+  return sortFilterSliceArr(formatToTransactionsArray(decodeTransactionsArray(transactions)))
 }
 
 export default function formatTimestampToDate(timestamp: number) {

@@ -1,6 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
@@ -9,10 +9,10 @@ import Box from '@mui/material/Box';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
-
 import { makeStyles } from "@mui/styles";
 import UsbOffTwoToneIcon from '@mui/icons-material/UsbOffTwoTone';
 import { shortenHex } from "../util";
+
 const useStyles = makeStyles({
   iconStyle: {
     background: "transparent",
@@ -32,6 +32,9 @@ const useStyles = makeStyles({
     color: "#FF7E3E",
     width: "12em",
     background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
+    "& .MuiSvgIcon-root": {
+      color: "#FF7E3E",
+    },
   }
 });
 
@@ -52,9 +55,6 @@ const myStyles = {
     width: "12em",
     background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
   },
-  dropdown: {
-    color: "#FF7E3E",
-  },
   menuItem: {
     marginBottom: "10px",
     border: "1px solid rgb(37, 106, 184)",
@@ -65,9 +65,6 @@ const myStyles = {
     color: "#FF7E3E",
     width: "12em",
     background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
-  },
-  inputLabel: {
-    color: "#FF7E3E",
   },
   select: {
     color: "#FF7E3E",
@@ -95,7 +92,7 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
   };
 
   const networkChanged = (chainId) => {
-    console.log({ chainId });
+    // console.log({ chainId });
   };
 
   useEffect(() => {
@@ -149,7 +146,7 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
             >
               <div>
                 {
-                  isMetaMaskInstalled ? "Connect a wallet" : "Connect to Wallet"
+                  isMetaMaskInstalled ? "Connect with Metamask" : "Connect to Wallet"
                 }
               </div>
             </button>
@@ -174,7 +171,7 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
       chainId: `0x${Number(1).toString(16)}`,
     }
   };
-  console.log('account :>> ', account);
+  
   const changeNetwork = async ({ networkName, setError }) => {
     try {
       if (!window.ethereum) throw new Error("No crypto wallet found");
