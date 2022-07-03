@@ -213,11 +213,9 @@ const Account = ({ triedToEagerConnect, sendExternalErrorMessage }: IAccount) =>
         ]
       })
         .then((txHash) => {
-          if (txHash === null) {
+          if (!txHash) {
             sendExternalErrorMessage("You are already connected to this network.");
-            setTimeout(() => {
-              sendExternalErrorMessage("")
-            }, 3000);
+            sendExternalErrorMessage("")
           }
         })
         .catch((error) => console.error);;
