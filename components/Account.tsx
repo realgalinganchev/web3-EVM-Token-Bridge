@@ -1,6 +1,6 @@
 import { useWeb3React } from "@web3-react/core";
 import { UserRejectedRequestError } from "@web3-react/injected-connector";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { injected } from "../connectors";
 import useENSName from "../hooks/useENSName";
 import useMetaMaskOnboarding from "../hooks/useMetaMaskOnboarding";
@@ -43,6 +43,7 @@ const myStyles = {
     marginRight: "1em",
     lineHeight: "55px"
   },
+  
   button: {
     cursor: "pointer",
     margin: "0 20px",
@@ -77,9 +78,9 @@ const myStyles = {
 
 const Account = ({ triedToEagerConnect }: IAccount) => {
   const styles = useStyles();
-  const { active, error, activate, deactivate, chainId, account, setError } =
-    useWeb3React();
-
+  const amountRef = useRef<HTMLInputElement | undefined>(null);
+  const [connecting, setConnecting] = useState(false);
+  const { active, error, activate, deactivate, chainId, account, setError } = useWeb3React();
   const {
     isMetaMaskInstalled,
     isWeb3Available,
@@ -87,23 +88,13 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
     stopOnboarding,
   } = useMetaMaskOnboarding();
 
-  const handleNetworkSwitch = async (networkName: string) => {
-    await changeNetwork({ networkName, setError });
-  };
-
-  const networkChanged = (chainId) => {
-    // console.log({ chainId });
-  };
-
   useEffect(() => {
     (window as any).ethereum.on("chainChanged", networkChanged);
 
     return () => {
       (window as any).ethereum.removeListener("chainChanged", networkChanged);
     };
-  }, []);
-
-  const [connecting, setConnecting] = useState(false);
+  }, [chainId]);
 
   useEffect(() => {
     if (active || error) {
@@ -111,6 +102,14 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
       stopOnboarding();
     }
   }, [active, error, stopOnboarding]);
+
+  const handleNetworkSwitch = async (networkName: string) => {
+    await changeNetwork({ networkName, setError });
+  };
+
+  const networkChanged = (chainId) => {
+    console.log({ chainId });
+  };
 
   const ENSName = useENSName(account);
 
@@ -120,6 +119,33 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
 
   if (!triedToEagerConnect) {
     return null;
+  }
+
+  const addTokenFunction = async () => {
+    // @ts-ignore
+    if (amountRef?.current?.value == 0) {
+      //displayErrorReason("Please enter an amount to bridge!");
+    } else {
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          await (window as any).ethereum.request({
+            method: 'wallet_watchAsset',
+            params: {
+              type: 'ERC20',
+              options: {
+                address: amountRef?.current?.value,
+                symbol: "TKN",
+                decimals: 18,
+              },
+            },
+          });
+        } catch (error) {
+          console.log(error);
+        }
+        amountRef.current.value = '';
+      }
+    }
+
   }
 
   if (typeof account !== "string") {
@@ -171,7 +197,7 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
       chainId: `0x${Number(1).toString(16)}`,
     }
   };
-  
+
   const changeNetwork = async ({ networkName, setError }) => {
     try {
       if (!window.ethereum) throw new Error("No crypto wallet found");
@@ -191,7 +217,8 @@ const Account = ({ triedToEagerConnect }: IAccount) => {
 
   return (
     <>
-      <span id="account">{account && `${shortenHex(account, 4)}`}</span>
+      <input className="header-element" ref={amountRef} type="text" id="address" placeholder="0x00..." />
+      <div className="header-element" style={myStyles.button} onClick={() => addTokenFunction()}>Add Token</div>
       <Box sx={{ minWidth: 120 }}>
         <FormControl fullWidth>
           <Select

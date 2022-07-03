@@ -7,7 +7,11 @@ const NativeCurrencyBalance = () => {
   const { account, chainId } = useWeb3React<Web3Provider>();
   const { data } = useNativeCurrencyBalance(account);
 
-  return <p>ETH Balance: Ξ {parseBalance(data ?? 0)}</p>;
+  return (
+    <p style={{ fontSize: "23px", margin: "0px", padding: "0px" }}> 
+     <span style={{ fontWeight: "500"}}>ETH Balance: Ξ </span><span style={{ fontWeight: "200"}}>{parseBalance(data ?? 0)}</span>
+     </p>
+  )
 
 };
 export default NativeCurrencyBalance;

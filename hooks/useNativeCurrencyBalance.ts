@@ -18,10 +18,10 @@ export default function useNativeCurrencyBalance(address: string, suspense = fal
 
   const result = useSWR(
     shouldFetch ? ["NativeCurrencyBalance", address, chainId] : null,
-    getNativeCurrencyBalance(library),
+     getNativeCurrencyBalance(library),
     {
       suspense,
-    }
+    },
   );
 
   useKeepSWRDataLiveAsBlocksArrive(result.mutate);

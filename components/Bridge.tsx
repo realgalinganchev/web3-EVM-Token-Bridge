@@ -175,9 +175,16 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           <TokenBalance tokenAddress={currentNetwork === "ropsten" ? TOKEN_ADDRESS_ROPSTEN : TOKEN_ADDRESS_RINKEBY} symbol={`${currentNetwork}TKN`} />
           <div className="bridge-value">
             <input ref={amountRef} type="text" id="price" placeholder="0.00" />
-            <button className="active" disabled={targetNetworkData[0].length === 0} onClick={() => sendTokensToTargetChain(targetNetworkData)}>
-              {targetNetworkData[0].length === 0 ? "choose target chain" : "Bridge to"}
-            </button>
+            {
+              targetNetworkData[0].length != 0 ?
+                <button className="active height" disabled={false} onClick={() => sendTokensToTargetChain(targetNetworkData)}>
+                  Bridge to
+                </button>
+                :
+                <button className="active" disabled={true} onClick={() => sendTokensToTargetChain(targetNetworkData)}>
+                  choose target chain
+                </button>
+            }
             <Box sx={{ minWidth: 120 }}>
               <FormControl fullWidth>
                 <Select
@@ -269,50 +276,6 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
 	        background-color: #FFBABA;
           border-radius: 25%;
           height: 80px;
-        }
-
-        input {
-          color: rgb(255, 255, 255);
-          position: relative;
-          font-weight: 500;
-          outline: none;
-          border: none;
-          flex: 1 1 auto;
-          border-radius: 25%;
-          background: radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%);
-          font-size: 28px;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          padding: 0px;
-          appearance: textfield;
-          filter: none;
-          opacity: 0.7;
-          transition: opacity 0.2s ease-in-out 0s;
-          text-align: left;
-          padding: 10px;
-          width: 6em;
-          border: 1px solid rgb(37, 106, 184);
-          text-indent: 46px;
-        }
-        
-        .action-button {
-          background-color: #FF7E3E;
-          height: 55px;
-          margin-top: 69px;
-          border-radius: 15px;
-          color: white;
-          font-size: 15px;
-          font-style: italic;
-          text-transform: uppercase;
-          font-weight: bold;
-          cursor: pointer;
-          opacity: 0.8;
-          box-shadow: 0px 4px 0px #999;
-        }
-
-        .unlock:hover {
-          background: #914925;
         }
 
         .loader {
