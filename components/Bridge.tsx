@@ -22,7 +22,7 @@ const useStyles = makeStyles({
     borderRadius: "25%",
     height: "50px",
     color: "#FF7E3E",
-    width: "12em",
+    width: "168px !important",
     background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
     "& .MuiSvgIcon-root": {
       color: "#FF7E3E",
@@ -37,17 +37,16 @@ const myStyles = {
     display: "flex",
     justifyContent: "center",
     borderRadius: "25%",
-    height: "50px",
+    height: "56px",
     color: "#FF7E3E",
-    width: "12em",
     background: "radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%)",
   },
   select: {
     color: "#FF7E3E",
     border: "1px solid rgb(37, 106, 184)",
     borderRadius: "25%",
-    height: "50px",
-    marginTop: "5px"
+    height: "58px",
+    width: "168px !important",
   },
 } as any;
 
@@ -279,7 +278,8 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           outline: none;
           border: none;
           flex: 1 1 auto;
-          background-color: #171E26;
+          border-radius: 25%;
+          background: radial-gradient(circle, rgba(37,106,184,1) 0%, rgba(25,30,35,1) 0%, rgba(21,30,41,1) 44%, rgba(21,30,41,1) 55%, rgba(23,34,48,1) 65%, rgba(28,47,69,1) 78%, rgba(28,47,69,1) 90%);
           font-size: 28px;
           white-space: nowrap;
           overflow: hidden;
@@ -290,10 +290,10 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           opacity: 0.7;
           transition: opacity 0.2s ease-in-out 0s;
           text-align: left;
-          border-radius: 5px;
           padding: 10px;
           width: 6em;
           border: 1px solid rgb(37, 106, 184);
+          text-indent: 46px;
         }
         
         .action-button {
@@ -309,7 +309,6 @@ const Bridge = ({ contractAddress }: IBridgeContract) => {
           cursor: pointer;
           opacity: 0.8;
           box-shadow: 0px 4px 0px #999;
-          margin-right: 22px;
         }
 
         .unlock:hover {

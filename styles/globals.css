@@ -49,6 +49,7 @@ background: transparent;
   font-style: italic;
   font-weight: lighter;
   margin-top: 5px;
+  width: 168px !important;
   margin-right: 20px;
   display: flex;
   flex-direction: column;
